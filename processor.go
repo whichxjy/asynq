@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/hibiken/asynq/internal/base"
@@ -151,6 +152,7 @@ func (p *processor) shutdown() {
 
 func (p *processor) start(wg *sync.WaitGroup) {
 	wg.Add(1)
+	qpsLogger()
 	go func() {
 		defer wg.Done()
 		for {
@@ -165,6 +167,22 @@ func (p *processor) start(wg *sync.WaitGroup) {
 	}()
 }
 
+var workerHandleCount int64
+
+func recordRequest() {
+	atomic.AddInt64(&workerHandleCount, 1)
+}
+
+func qpsLogger() {
+	ticker := time.NewTicker(60 * time.Second)
+	for {
+		<-ticker.C
+		qps := atomic.LoadInt64(&workerHandleCount) / 60
+		fmt.Printf("Dequeue QPS: %d\n", qps)
+		atomic.StoreInt64(&workerHandleCount, 0) // Reset the counter
+	}
+}
+
 // exec pulls a task out of the queue and starts a worker goroutine to
 // process the task.
 func (p *processor) exec() {
@@ -173,6 +191,7 @@ func (p *processor) exec() {
 		return
 	case p.sema <- struct{}{}: // acquire token
 		qnames := p.queues()
+		recordRequest()
 		msg, leaseExpirationTime, err := p.broker.Dequeue(qnames...)
 		switch {
 		case errors.Is(err, errors.ErrNoProcessableTask):
