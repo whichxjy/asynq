@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
-	"github.com/hibiken/asynq/internal/base"
-	asynqcontext "github.com/hibiken/asynq/internal/context"
+	"github.com/hibiken/asynq/internalx/base"
+	asynqcontext "github.com/hibiken/asynq/internalx/context"
 	"github.com/redis/go-redis/v9"
 )
 

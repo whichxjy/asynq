@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hibiken/asynq"
-	asynqcontext "github.com/hibiken/asynq/internal/context"
+	asynqcontext "github.com/hibiken/asynq/internalx/context"
 	"github.com/redis/go-redis/v9"
 )
 

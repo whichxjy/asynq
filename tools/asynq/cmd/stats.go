@@ -18,7 +18,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
-	"github.com/hibiken/asynq/internal/rdb"
+	"github.com/hibiken/asynq/internalx/rdb"
 	"github.com/spf13/cobra"
 )
 

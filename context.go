@@ -7,7 +7,7 @@ package asynq
 import (
 	"context"
 
-	asynqcontext "github.com/hibiken/asynq/internal/context"
+	asynqcontext "github.com/hibiken/asynq/internalx/context"
 )
 
 // GetTaskID extracts a task ID from a context, if any.

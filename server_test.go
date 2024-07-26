@@ -11,15 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hibiken/asynq/internal/rdb"
-	"github.com/hibiken/asynq/internal/testbroker"
-	"github.com/hibiken/asynq/internal/testutil"
+	"github.com/hibiken/asynq/internalx/rdb"
+	"github.com/hibiken/asynq/internalx/testbroker"
+	"github.com/hibiken/asynq/internalx/testutil"
 	"go.uber.org/goleak"
 )
 
 func TestServer(t *testing.T) {
 	// https://github.com/go-redis/redis/issues/1029
-	ignoreOpt := goleak.IgnoreTopFunction("github.com/redis/go-redis/v9/internal/pool.(*ConnPool).reaper")
+	ignoreOpt := goleak.IgnoreTopFunction("github.com/redis/go-redis/v9/internalx/pool.(*ConnPool).reaper")
 	defer goleak.VerifyNone(t, ignoreOpt)
 
 	redisConnOpt := getRedisConnOpt(t)
@@ -55,7 +55,7 @@ func TestServer(t *testing.T) {
 
 func TestServerRun(t *testing.T) {
 	// https://github.com/go-redis/redis/issues/1029
-	ignoreOpt := goleak.IgnoreTopFunction("github.com/redis/go-redis/v9/internal/pool.(*ConnPool).reaper")
+	ignoreOpt := goleak.IgnoreTopFunction("github.com/redis/go-redis/v9/internalx/pool.(*ConnPool).reaper")
 	defer goleak.VerifyNone(t, ignoreOpt)
 
 	srv := NewServer(RedisClientOpt{Addr: ":6379"}, Config{LogLevel: testLogLevel})
