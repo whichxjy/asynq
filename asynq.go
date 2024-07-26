@@ -416,6 +416,10 @@ type RedisClusterClientOpt struct {
 	// Default is ReadTimeout.
 	WriteTimeout time.Duration
 
+	// Maximum number of socket connections.
+	// Default is 10 connections per every CPU as reported by runtime.NumCPU.
+	PoolSize int
+
 	// TLS Config used to connect to a server.
 	// TLS will be negotiated only if this field is set.
 	TLSConfig *tls.Config
@@ -436,6 +440,7 @@ func (opt RedisClusterClientOpt) MakeRedisClient() interface{} {
 			DialTimeout:  opt.DialTimeout,
 			ReadTimeout:  opt.ReadTimeout,
 			WriteTimeout: opt.WriteTimeout,
+			PoolSize:     opt.PoolSize,
 			TLSConfig:    opt.TLSConfig,
 		})
 	})
