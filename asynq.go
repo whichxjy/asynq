@@ -12,10 +12,11 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/hibiken/asynq/internal/base"
+	"github.com/redis/go-redis/v9"
 )
 
 // Task represents a unit of work to be performed.
@@ -420,17 +421,25 @@ type RedisClusterClientOpt struct {
 	TLSConfig *tls.Config
 }
 
+var (
+	once        sync.Once
+	redisClient redis.UniversalClient
+)
+
 func (opt RedisClusterClientOpt) MakeRedisClient() interface{} {
-	return redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:        opt.Addrs,
-		MaxRedirects: opt.MaxRedirects,
-		Username:     opt.Username,
-		Password:     opt.Password,
-		DialTimeout:  opt.DialTimeout,
-		ReadTimeout:  opt.ReadTimeout,
-		WriteTimeout: opt.WriteTimeout,
-		TLSConfig:    opt.TLSConfig,
+	once.Do(func() {
+		redisClient = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:        opt.Addrs,
+			MaxRedirects: opt.MaxRedirects,
+			Username:     opt.Username,
+			Password:     opt.Password,
+			DialTimeout:  opt.DialTimeout,
+			ReadTimeout:  opt.ReadTimeout,
+			WriteTimeout: opt.WriteTimeout,
+			TLSConfig:    opt.TLSConfig,
+		})
 	})
+	return redisClient
 }
 
 // ParseRedisURI parses redis uri string and returns RedisConnOpt if uri is valid.
@@ -438,10 +447,11 @@ func (opt RedisClusterClientOpt) MakeRedisClient() interface{} {
 //
 // Three URI schemes are supported, which are redis:, rediss:, redis-socket:, and redis-sentinel:.
 // Supported formats are:
-//     redis://[:password@]host[:port][/dbnumber]
-//     rediss://[:password@]host[:port][/dbnumber]
-//     redis-socket://[:password@]path[?db=dbnumber]
-//     redis-sentinel://[:password@]host1[:port][,host2:[:port]][,hostN:[:port]][?master=masterName]
+//
+//	redis://[:password@]host[:port][/dbnumber]
+//	rediss://[:password@]host[:port][/dbnumber]
+//	redis-socket://[:password@]path[?db=dbnumber]
+//	redis-sentinel://[:password@]host1[:port][,host2:[:port]][,hostN:[:port]][?master=masterName]
 func ParseRedisURI(uri string) (RedisConnOpt, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
