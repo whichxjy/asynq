@@ -173,14 +173,18 @@ func recordRequest() {
 	atomic.AddInt64(&workerHandleCount, 1)
 }
 
+var onceLogger sync.Once
+
 func qpsLogger() {
-	ticker := time.NewTicker(60 * time.Second)
-	for {
-		<-ticker.C
-		qps := atomic.LoadInt64(&workerHandleCount) / 60
-		fmt.Printf("Dequeue QPS: %d\n", qps)
-		atomic.StoreInt64(&workerHandleCount, 0) // Reset the counter
-	}
+	onceLogger.Do(func() {
+		ticker := time.NewTicker(60 * time.Second)
+		for {
+			<-ticker.C
+			qps := atomic.LoadInt64(&workerHandleCount) / 60
+			fmt.Printf("Dequeue QPS: %d\n", qps)
+			atomic.StoreInt64(&workerHandleCount, 0) // Reset the counter
+		}
+	})
 }
 
 // exec pulls a task out of the queue and starts a worker goroutine to
