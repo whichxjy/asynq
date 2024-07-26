@@ -178,10 +178,10 @@ var onceLogger sync.Once
 func qpsLogger() {
 	onceLogger.Do(func() {
 		go func() {
-			ticker := time.NewTicker(60 * time.Second)
+			ticker := time.NewTicker(30 * time.Second)
 			for {
 				<-ticker.C
-				qps := atomic.LoadInt64(&workerHandleCount) / 60
+				qps := atomic.LoadInt64(&workerHandleCount) / 30
 				fmt.Printf("Dequeue QPS: %d\n", qps)
 				atomic.StoreInt64(&workerHandleCount, 0) // Reset the counter
 			}
