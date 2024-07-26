@@ -177,13 +177,15 @@ var onceLogger sync.Once
 
 func qpsLogger() {
 	onceLogger.Do(func() {
-		ticker := time.NewTicker(60 * time.Second)
-		for {
-			<-ticker.C
-			qps := atomic.LoadInt64(&workerHandleCount) / 60
-			fmt.Printf("Dequeue QPS: %d\n", qps)
-			atomic.StoreInt64(&workerHandleCount, 0) // Reset the counter
-		}
+		go func() {
+			ticker := time.NewTicker(60 * time.Second)
+			for {
+				<-ticker.C
+				qps := atomic.LoadInt64(&workerHandleCount) / 60
+				fmt.Printf("Dequeue QPS: %d\n", qps)
+				atomic.StoreInt64(&workerHandleCount, 0) // Reset the counter
+			}
+		}()
 	})
 }
 
